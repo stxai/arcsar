@@ -30,6 +30,12 @@
 
 ## Usage
 
+Extract frames from video:
+```bash
+uv run python -m arcsar.utils.frame_extraction.py
+```
+
+
 Segment images:
 ```bash
 uv run python -m arcsar.segmentation.segment

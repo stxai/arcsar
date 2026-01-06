@@ -30,6 +30,7 @@ def segment(processor, image):
 def convert_mask_to_img(masks):
     """
     Moves tensor mask from GPU to CPU and then converts it to a numpy array (boolean).
+    Removes batch dimension and takes the union of multiple masks exist.
     Then to a grayscale array and then to a PIL image.
     """
     # Masks tensor -> [n_batches, n_masks_on_img, height, width]
