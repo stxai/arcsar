@@ -24,6 +24,11 @@ A SAR (Synthetic Aperture Radar) image processing pipeline with segmentation cap
    ```bash
    uv sync
    ```
+   Optionally dev dependencies:
+   ```bash
+   uv sync --extra dev
+   ```
+
 
 ## Usage
 
