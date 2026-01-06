@@ -17,6 +17,14 @@ dependencies = [
     "sam3[notebooks]", 
 ]
 
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "pytest",
+]
+
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
@@ -31,3 +39,24 @@ torch = { index = "pytorch-cu126" }
 torchvision = { index = "pytorch-cu126" }
 torchaudio = { index = "pytorch-cu126" }
 sam3 = { path = "external/sam3", editable = true }
+
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+src = ["src"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "UP",   # pyupgrade
+]
+ignore = []
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

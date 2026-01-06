@@ -1,13 +1,11 @@
 import os
-from PIL import Image
-from sam3.model_builder import build_sam3_image_model
-from sam3.model.box_ops import box_xywh_to_cxcywh
-from sam3.model.sam3_image_processor import Sam3Processor
-from sam3.visualization_utils import draw_box_on_image, normalize_bbox, plot_results
 
+import numpy as np
 import torch
 import torchvision
-import numpy as np
+from PIL import Image
+from sam3.model.sam3_image_processor import Sam3Processor
+from sam3.model_builder import build_sam3_image_model
 
 print("PyTorch version:", torch.__version__)
 print("Torchvision version:", torchvision.__version__)
@@ -18,7 +16,7 @@ torch.backends.cuda.matmul.allow_tf32 = True
 torch.backends.cudnn.allow_tf32 = True
 
 
-def segment(processor, image) -> torch.Tensor:
+def segment(processor, image):
     with torch.autocast("cuda", dtype=torch.bfloat16):
         # Load an image
         inference_state = processor.set_image(image)
