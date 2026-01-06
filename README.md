@@ -1,9 +1,7 @@
 # Arcsar
 
-A SAR (Synthetic Aperture Radar) image processing pipeline with segmentation capabilities.
 ## Requirements
 
-- Python 3.12+
 - [uv](https://docs.astral.sh/uv/) package manager
 - CUDA-capable GPU (recommended)
 
