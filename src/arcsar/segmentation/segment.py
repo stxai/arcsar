@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -27,8 +28,23 @@ def segment(processor, image):
 
 
 def convert_mask_to_img(masks):
-    masks_np = masks.squeeze().cpu().numpy()
-    mask_image = (masks_np * 255).astype(np.uint8)
+    """
+    Moves tensor mask from GPU to CPU and then converts it to a numpy array (boolean).
+    Then to a grayscale array and then to a PIL image.
+    """
+    # Masks tensor -> [n_batches, n_masks_on_img, height, width]
+    masks_np = masks.cpu().numpy()
+
+    # Remove batch dimension if present
+    if masks_np.ndim == 4:
+        masks_np = masks_np[0]
+
+    # Combine multiple masks into one by taking the max (union of masks)
+    if masks_np.ndim == 3:
+        combined_mask = masks_np.max(axis=0)  # Shape: [height, width]
+    else:
+        combined_mask = masks_np
+    mask_image = (combined_mask * 255).astype(np.uint8)
     return Image.fromarray(mask_image)
 
 
@@ -48,9 +64,20 @@ def overlay_mask_on_img(pil_mask, original_image):
     return result
 
 
-def save_image(output_dir, image) -> None:
+def load_images(folder_path: str, extensions: tuple = (".jpg", ".jpeg")) -> list[Path]:
+    """
+    Load all image paths from a folder.
+    """
+    folder = Path(folder_path)
+    image_paths = sorted(
+        [p for p in folder.iterdir() if p.suffix.lower() in extensions]
+    )
+    return image_paths
+
+
+def save_image(output_dir: str, name: str, image) -> None:
     os.makedirs(output_dir, exist_ok=True)
-    image.save(f"{output_dir}/out.png")
+    image.save(f"{output_dir}/{name}_masked.png")
 
 
 def main():
@@ -58,19 +85,20 @@ def main():
     model = build_sam3_image_model()
     processor = Sam3Processor(model)
 
-    image_name: str = "frame_00001.png"
-    image_path: str = f"./repo/assets/images/{image_name}"
-    image = Image.open(image_path)
+    # image_name: str = "frame_00001.png"
+    # image_path: str = f"./repo/assets/images/{image_name}"
+    # image = Image.open(image_path)
+    input_dir: str = "./output/video"
+    image_paths = load_images(input_dir)
+    print(f"Found {len(image_paths)} images to mask")
 
-    masks, boxes, scores = segment(processor, image)
-    # Convert mask tensor to a PIL Image
-    # Masks tensor -> [n_batches, n_masks_on_img, height, width]
-    pil_mask = convert_mask_to_img(masks)
-    overlay_img = overlay_mask_on_img(pil_mask, image)
-    save_image("./output", overlay_img)
-    # pil_mask.show()
-    # image.show()
-    # overlay_img.show()
+    for i, image_path in enumerate(image_paths):
+        print(f"Processing [{i + 1}/{len(image_paths)}]: {image_path.name}")
+        image = Image.open(image_path)
+        masks, boxes, scores = segment(processor, image)
+        pil_mask = convert_mask_to_img(masks)
+        overlay_img = overlay_mask_on_img(pil_mask, image)
+        save_image("./output/masked", image_path.name, overlay_img)
 
 
 if __name__ == "__main__":
